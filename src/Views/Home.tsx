@@ -3,11 +3,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Image,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -52,6 +53,13 @@ export default function HomeScreen() {
   const params = useLocalSearchParams();
   const [cigarettesToday, setCigarettesToday] = useState(params.cigarettes ? parseInt(params.cigarettes) : 0);
   const [daysWithoutSmoking, setDaysWithoutSmoking] = useState(params.days ? parseInt(params.days) : 0);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const notifications = [
+    { id: 1, title: "¡Felicidades!", message: "Has completado 3 días sin fumar 🎉", time: "Hace 2h" },
+    { id: 2, title: "Recordatorio", message: "No olvides registrar tu progreso diario", time: "Hace 5h" },
+    { id: 3, title: "Consejo del día", message: "Bebe agua para reducir las ganas de fumar", time: "Ayer" },
+  ];
 
   return (
     <View style={styles.container}>
@@ -60,10 +68,32 @@ export default function HomeScreen() {
         <View style={styles.scroll}>
           {/* Botón de notificación */}
           <View style={styles.notificationRow}>
-            <TouchableOpacity style={styles.notificationBtn}>
+            <TouchableOpacity style={styles.notificationBtn} onPress={() => setShowNotifications(!showNotifications)}>
               <Ionicons name="notifications-outline" size={32} color={C.dark} />
               <View style={styles.notificationDot} />
             </TouchableOpacity>
+
+            {/* Nube flotante de notificaciones */}
+            {showNotifications && (
+              <View style={styles.notificationCloud}>
+                <View style={styles.cloudHeader}>
+                  <Text style={styles.cloudTitle}>Notificaciones</Text>
+                  <TouchableOpacity onPress={() => setShowNotifications(false)}>
+                    <Ionicons name="close" size={20} color={C.dark} />
+                  </TouchableOpacity>
+                </View>
+                {notifications.map((notif) => (
+                  <View key={notif.id} style={styles.notificationItem}>
+                    <View style={styles.notificationItemDot} />
+                    <View style={styles.notificationItemContent}>
+                      <Text style={styles.notificationItemTitle}>{notif.title}</Text>
+                      <Text style={styles.notificationItemMessage}>{notif.message}</Text>
+                      <Text style={styles.notificationItemTime}>{notif.time}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
 
           {/* Banner */}
@@ -79,10 +109,8 @@ export default function HomeScreen() {
                 Cada día es un paso más hacia una mejor versión de ti.
               </Text>
             </View>
-            <Ionicons
-              name="sunny"
-              size={84}
-              color="#F6C453"
+            <Image
+              source={require("../Imagen/feliz.png")}
               style={styles.bannerSun}
             />
           </LinearGradient>
@@ -122,7 +150,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           {/* Botón Componente educativos */}
-          <TouchableOpacity activeOpacity={0.9} style={styles.eduCard} onPress={() => router.push("/educativos")}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.eduCard} onPress={() => router.push("/componentes")}>
             <View style={[styles.eduIcon, { backgroundColor: "#C9E3F7" }]}>
               <Ionicons name="book-outline" size={22} color="#3B8BD4" />
             </View>
@@ -152,8 +180,9 @@ const styles = StyleSheet.create({
 
   notificationRow: {
     position: "absolute",
-    top: 50,
+    top: 40,
     right: 20,
+    zIndex: 10,
   },
   notificationBtn: {
     width: 50,
@@ -178,6 +207,66 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5484D",
     borderWidth: 2,
     borderColor: C.white,
+  },
+  notificationCloud: {
+    position: "absolute",
+    top: 60,
+    right: 0,
+    width: 280,
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  cloudHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  cloudTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: C.dark,
+  },
+  notificationItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  notificationItemDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: C.green,
+    marginTop: 6,
+    marginRight: 10,
+  },
+  notificationItemContent: {
+    flex: 1,
+  },
+  notificationItemTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.dark,
+    marginBottom: 2,
+  },
+  notificationItemMessage: {
+    fontSize: 12,
+    color: C.muted,
+    lineHeight: 16,
+    marginBottom: 2,
+  },
+  notificationItemTime: {
+    fontSize: 10,
+    color: "#9CA3AF",
   },
 
   header: {
@@ -234,7 +323,7 @@ const styles = StyleSheet.create({
   },
   bannerTitle: { fontSize: 24, fontWeight: "800", color: C.dark },
   bannerText: { marginTop: 6, fontSize: 15, lineHeight: 22, color: C.text },
-  bannerSun: { opacity: 0.9 },
+  bannerSun: { width: 84, height: 84, resizeMode: "contain", opacity: 0.9 },
 
   statsGrid: {
     flexDirection: "row",

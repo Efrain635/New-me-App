@@ -26,17 +26,15 @@ export default function WelcomeScreen() {
 
         {/* Título */}
         <View style={styles.textBlock}>
-          <View style={styles.titleRow}>
-            <View style={styles.titleTextContainer}>
-              <Text style={styles.title}>¡Te damos la bienvenida a</Text>
-              <Text style={styles.titleGreen}>New me!</Text>
-              <Text style={styles.subtitle} numberOfLines={1}>Como estudiantes de odontología.</Text>
-              <Text style={styles.subtitle} numberOfLines={1}>Dirigimos esta app al público masculino</Text>
-              <Text style={styles.subtitle} numberOfLines={1}>con el único objetivo de poder informales y </Text>
-              <Text style={styles.subtitle} numberOfLines={1}>concientizarle sobre los efectos del tabaco en su salud bucal</Text>
-            </View>
-            <Image source={require("../Imagen/Dienteycigarrillo.png")} style={styles.welcomeImage} />
+          <View style={styles.titleTextContainer}>
+            <Text style={styles.title}>¡Te damos la bienvenida a</Text>
+            <Text style={styles.titleGreen}>New me!</Text>
+            <Text style={styles.subtitle}>Como estudiantes de odontología.</Text>
+            <Text style={styles.subtitle}>Dirigimos esta app al público masculino</Text>
+            <Text style={styles.subtitle}>con el único objetivo de poder informales y</Text>
+            <Text style={styles.subtitle}>concientizarle sobre los efectos del tabaco en su salud bucal</Text>
           </View>
+          <Image source={require("../Imagen/Dienteycigarrillo.png")} style={styles.welcomeImage} />
         </View>
 
         {/* Botón */}
@@ -85,15 +83,14 @@ const styles = StyleSheet.create({
     width: "90%",
   },
 
-  textBlock: { marginTop: 40 },
-  titleRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", position: "relative" },
-  titleTextContainer: { flex: 1, maxWidth: "100%" },
-  title: { fontSize: 40, fontWeight: "800", color: "#0F3D3E", lineHeight: 48 },
-  titleGreen: { fontSize: 42, fontWeight: "800", color: "#3E8E4F", lineHeight: 50 },
-  subtitle: { marginTop: 4, fontSize: 15, color: "#4A5568", lineHeight: 23 },
+  textBlock: { marginTop: 40, position: "relative" },
+  titleTextContainer: { width: "100%" },
+  title: { fontSize: 36, fontWeight: "800", color: "#0F3D3E", lineHeight: 44 },
+  titleGreen: { fontSize: 38, fontWeight: "800", color: "#3E8E4F", lineHeight: 46, marginBottom: 15 },
+  subtitle: { marginTop: 3, fontSize: 12, color: "#4A5568", lineHeight: 17 },
   textLineContainer: { marginBottom: 8 },
   textLine: { height: 2, backgroundColor: "#4A5568", opacity: 0.3, marginTop: 4 },
-  welcomeImage: { width: 280, height: 280, resizeMode: "contain", position: "absolute", right: -70, top: -80 },
+  welcomeImage: { width: 220, height: 220, resizeMode: "contain", position: "absolute", right: -45, top: -30, opacity: 0.9 },
 
   bottom: { marginTop: 120, alignItems: "center" },
   button: {
