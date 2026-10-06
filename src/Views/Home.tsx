@@ -1,7 +1,7 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Image,
     StatusBar,
@@ -51,9 +51,19 @@ function StatCard({ icon, tint, bg, label, value, sub, progress }) {
 
 export default function HomeScreen() {
   const params = useLocalSearchParams();
-  const [cigarettesToday, setCigarettesToday] = useState(params.cigarettes ? parseInt(params.cigarettes) : 0);
-  const [daysWithoutSmoking, setDaysWithoutSmoking] = useState(params.days ? parseInt(params.days) : 0);
+  const [totalCigarettes, setTotalCigarettes] = useState(params.totalCigarettes ? parseInt(params.totalCigarettes as string) : 0);
+  const [daysWithoutSmoking, setDaysWithoutSmoking] = useState(params.daysWithoutSmoking ? parseInt(params.daysWithoutSmoking as string) : 0);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // Actualizar cuando recibimos nuevos params de smokedtoday
+  useEffect(() => {
+    if (params.totalCigarettes) {
+      setTotalCigarettes(parseInt(params.totalCigarettes as string));
+    }
+    if (params.daysWithoutSmoking) {
+      setDaysWithoutSmoking(parseInt(params.daysWithoutSmoking as string));
+    }
+  }, [params.totalCigarettes, params.daysWithoutSmoking]);
 
   const notifications = [
     { id: 1, title: "¡Felicidades!", message: "Has completado 3 días sin fumar 🎉", time: "Hace 2h" },
@@ -121,9 +131,9 @@ export default function HomeScreen() {
               icon="ban-outline"
               tint="#E0645C"
               bg="#FFF3F2"
-              label="Cigarrillos hoy"
-              value={cigarettesToday.toString()}
-              sub="de 60 al día"
+              label="Total cigarrillos"
+              value={totalCigarettes.toString()}
+              sub="acumulados"
             />
             <StatCard
               icon="calendar-outline"
@@ -136,7 +146,17 @@ export default function HomeScreen() {
           </View>
 
           {/* Botón principal */}
-          <TouchableOpacity activeOpacity={0.9} style={{ marginTop: 18 }} onPress={() => router.push("/smokedtoday")}>
+          <TouchableOpacity 
+            activeOpacity={0.9} 
+            style={{ marginTop: 18 }} 
+            onPress={() => router.push({
+              pathname: "/smokedtoday",
+              params: {
+                totalCigarettes: totalCigarettes.toString(),
+                daysWithoutSmoking: daysWithoutSmoking.toString()
+              }
+            })}
+          >
             <LinearGradient
               colors={["#4C9A5F", "#2F7D4F"]}
               start={{ x: 0, y: 0 }}

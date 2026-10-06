@@ -2,7 +2,6 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
-    Image,
     StatusBar,
     StyleSheet,
     Text,
@@ -21,20 +20,8 @@ const C = {
 
 const MODULES = [
   {
-    id: 1,
-    badge: "Módulo 1",
-    title: "Hábitos que cuidan tu salud ante el tabaco",
-    text: "Descubre cómo los buenos hábitos te ayudan a prevenir enfermedades bucales y a mantener tu salud general, libre de tabaco.",
-    icon: "shield-checkmark",
-    accent: "#2F8F57",
-    bg: "#EAF7EF",
-    border: "#BFE3CD",
-    soft: "#CDEBD8",
-    titleColor: "#0F4A3A",
-  },
-  {
     id: 2,
-    badge: "Módulo 2",
+    badge: "Módulo 1",
     title: "Comienzo de una sonrisa",
     text: "Aprende sobre la formación y el desarrollo de los dientes.",
     icon: "happy",
@@ -43,6 +30,18 @@ const MODULES = [
     border: "#BFDDF4",
     soft: "#C9E3F7",
     titleColor: "#0F3D5E",
+  },
+  {
+    id: 1,
+    badge: "Módulo 2",
+    title: "Hábitos que cuidan tu salud ante el tabaco",
+    text: "Descubre cómo los buenos hábitos te ayudan a prevenir enfermedades bucales y a mantener tu salud general, libre de tabaco.",
+    icon: "shield-checkmark",
+    accent: "#2F8F57",
+    bg: "#EAF7EF",
+    border: "#BFE3CD",
+    soft: "#CDEBD8",
+    titleColor: "#0F4A3A",
   },
   {
     id: 3,
@@ -58,7 +57,7 @@ const MODULES = [
   },
 ];
 
-function ModuleCard({ m, onPress }) {
+function ModuleCard({ m, onPress }: { m: any; onPress: () => void }) {
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -102,16 +101,7 @@ export default function ComponentsScreen() {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <View style={styles.scroll}>
-          {/* Logo */}
-          <View style={styles.logoRow}>
-            <Image source={require("../Imagen/Logo.png")} style={styles.logoImage} />
-            <View style={{ marginLeft: 10 }}>
-              <Text style={styles.logoText}>
-                New <Text style={styles.logoItalic}>me</Text>
-              </Text>
-              <View style={styles.logoUnderline} />
-            </View>
-          </View>
+
 
           {/* Título */}
           <Text style={styles.title}>Componentes</Text>
@@ -126,10 +116,29 @@ export default function ComponentsScreen() {
               <ModuleCard
                 key={m.id}
                 m={m}
-                onPress={() => router.push({ pathname: "/modulo", params: { id: m.id } })}
+                onPress={() => {
+                  if (m.id === 2) {
+                    router.push("/desarrollo-dientes" as any);
+                  } else if (m.id === 1) {
+                    router.push("/halitosis" as any);
+                  } else if (m.id === 3) {
+                    router.push("/salud-bucal" as any);
+                  } else {
+                    router.push({ pathname: "/modulo" as any, params: { id: m.id } });
+                  }
+                }}
               />
             ))}
           </View>
+
+          {/* Botón de regreso */}
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
+            <Feather name="arrow-left" size={20} color={C.dark} />
+            <Text style={styles.backText}>Atrás</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -137,59 +146,85 @@ export default function ComponentsScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
+  scroll: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 20 },
 
   logoRow: { flexDirection: "row", alignItems: "center", marginTop: 5 },
-  logoImage: { width: 70, height: 70, resizeMode: "contain", opacity: 0.9 },
-  logoText: { fontSize: 38, fontWeight: "800", color: C.dark },
+  logoImage: { width: 65, height: 65, resizeMode: "contain", opacity: 0.9 },
+  logoText: { fontSize: 34, fontWeight: "800", color: C.dark },
   logoItalic: { fontStyle: "italic", color: C.green, fontWeight: "700" },
   logoUnderline: {
     height: 3,
     borderRadius: 2,
     backgroundColor: C.green,
     marginTop: 2,
-    width: "90%",
+    width: "85%",
+  },
+  logoImage: { width: 65, height: 65, resizeMode: "contain", opacity: 0.9 },
+  logoText: { fontSize: 34, fontWeight: "800", color: C.dark },
+  logoItalic: { fontStyle: "italic", color: C.green, fontWeight: "700" },
+  logoUnderline: {
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: C.green,
+    marginTop: 2,
+    width: "85%",
   },
 
-  title: { fontSize: 36, fontWeight: "800", color: C.dark, marginTop: 20 },
-  subtitle: { fontSize: 16, color: C.muted, lineHeight: 24, marginTop: 8 },
+  title: { fontSize: 32, fontWeight: "800", color: C.dark, marginTop: 18 },
+  subtitle: { fontSize: 15, color: C.muted, lineHeight: 22, marginTop: 6 },
 
-  list: { marginTop: 24, gap: 16 },
+  backButton: {
+    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: C.green,
+    backgroundColor: '#FFFFFF',
+    gap: 8,
+  },
+  backText: { fontSize: 16, fontWeight: '700', color: C.dark },
+
+  list: { marginTop: 20, gap: 14 },
 
   card: {
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1.5,
-    paddingVertical: 24,
-    paddingHorizontal: 14,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
     shadowColor: "#000",
     shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   cardContent: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
+    gap: 12,
   },
   imagePlaceholder: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: "center",
     justifyContent: "center",
   },
-  illusLeaf: { position: "absolute", right: 5, bottom: 6, opacity: 0.5 },
+  illusLeaf: { position: "absolute", right: 4, bottom: 5, opacity: 0.5 },
 
   cardBody: { flex: 1 },
-  badgeText: { fontSize: 12, fontWeight: "800", marginBottom: 4 },
-  cardTitle: { fontSize: 15, fontWeight: "800", lineHeight: 19, marginBottom: 4 },
-  cardText: { fontSize: 12, color: C.muted, lineHeight: 16 },
+  badgeText: { fontSize: 11, fontWeight: "800", marginBottom: 3 },
+  cardTitle: { fontSize: 14, fontWeight: "800", lineHeight: 18, marginBottom: 3 },
+  cardText: { fontSize: 11.5, color: C.muted, lineHeight: 15 },
 
   arrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -1,6 +1,6 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -35,7 +35,7 @@ const OPTIONS = [
 ];
 
 /* Mini ilustración de cigarrillos hecha con Views */
-function Cigs({ count }) {
+function Cigs({ count }: { count: number }) {
   if (count === 0) {
     return <Feather name="edit-2" size={22} color={C.greenDeep} />;
   }
@@ -52,7 +52,7 @@ function Cigs({ count }) {
   );
 }
 
-function Radio({ selected }) {
+function Radio({ selected }: { selected: boolean }) {
   return (
     <View style={[styles.radio, selected && styles.radioOn]}>
       {selected ? <View style={styles.radioDot} /> : null}
@@ -61,8 +61,12 @@ function Radio({ selected }) {
 }
 
 export default function SmokedTodayScreen() {
+  const params = useLocalSearchParams();
+  const currentTotal = params.totalCigarettes ? parseInt(params.totalCigarettes as string) : 0;
+  const currentDays = params.daysWithoutSmoking ? parseInt(params.daysWithoutSmoking as string) : 0;
+  
   const [smoked, setSmoked] = useState(true);
-  const [amount, setAmount] = useState(null);
+  const [amount, setAmount] = useState<string | null>(null);
   const [other, setOther] = useState("");
 
   const canContinue =
@@ -72,22 +76,31 @@ export default function SmokedTodayScreen() {
   const handleContinue = () => {
     if (smoked === false) {
       // No fumó - incrementar días sin fumar
+      const newDays = currentDays + 1;
       router.push({
         pathname: "/home",
-        params: { days: "1" }
+        params: { 
+          daysWithoutSmoking: newDays.toString(),
+          totalCigarettes: currentTotal.toString()
+        }
       });
     } else if (amount) {
-      // Fumó - enviar cantidad de cigarrillos
+      // Fumó - sumar cantidad de cigarrillos al total
       let cigCount = 0;
       if (amount === "otro") {
         cigCount = parseInt(other) || 0;
       } else {
-        const ranges = { "1-5": 3, "6-10": 8, "11-15": 13, "16-20": 18, "20+": 25 };
+        const ranges: Record<string, number> = { "1-5": 3, "6-10": 8, "11-15": 13, "16-20": 18, "20+": 25 };
         cigCount = ranges[amount] || 0;
       }
+      const newTotal = currentTotal + cigCount;
       router.push({
         pathname: "/home",
-        params: { cigarettes: cigCount.toString() }
+        params: { 
+          cigarettes: cigCount.toString(),
+          totalCigarettes: newTotal.toString(),
+          daysWithoutSmoking: currentDays.toString()
+        }
       });
     }
   };
