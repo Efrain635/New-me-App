@@ -34,6 +34,38 @@ const OPTIONS = [
   { key: "otro", label: "Otro", count: 0 },
 ];
 
+// 5 notificaciones de consejos para cuando fuma poco
+const LOW_SMOKE_ADVICE = [
+  "Deja de fumar que tienes tiempo de hacerlo 💪",
+  "Cada cigarrillo menos es un paso hacia la libertad 🌱",
+  "Tu cuerpo te agradecerá cada decisión saludable 💚",
+  "Empieza hoy, tu yo del futuro te lo agradecerá 🎯",
+  "No es tarde para cambiar, empieza ahora mismo 🚀",
+];
+
+// 5 notificaciones de advertencias para cuando fuma mucho
+const HIGH_SMOKE_WARNING = [
+  "⚠️ Esto es algo serio y hay que dejarlo ya",
+  "⚠️ Tu salud está en riesgo, toma conciencia",
+  "⚠️ El tabaco destruye tu cuerpo gradualmente",
+  "⚠️ Piensa en tu familia y seres queridos",
+  "⚠️ Cada cigarrillo cuenta, detente a tiempo",
+];
+
+// 10 felicitaciones diferentes para cuando no fuma
+const CONGRATULATIONS = [
+  "¡Felicitaciones! Dejaste de fumar hoy 🎉",
+  "¡Excelente! Un día más libre de tabaco 💚",
+  "¡Bravo! Tu salud te está agradeciendo 🌟",
+  "¡Increíble! Eres más fuerte que la adicción 💪",
+  "¡Fantástico! Siguiendo el camino correcto 🎯",
+  "¡Maravilloso! Un logro para celebrar 🏆",
+  "¡Genial! Cada día sin fumar es una victoria ⭐",
+  "¡Perfecto! Tu determinación es inspiradora 🌈",
+  "¡Magnífico! Eres un ejemplo a seguir 💫",
+  "¡Sorprendente! Sigue construyendo tu futuro brillante ✨",
+];
+
 /* Mini ilustración de cigarrillos hecha con Views */
 function Cigs({ count }: { count: number }) {
   if (count === 0) {
@@ -68,6 +100,11 @@ export default function SmokedTodayScreen() {
   const [smoked, setSmoked] = useState(true);
   const [amount, setAmount] = useState<string | null>(null);
   const [other, setOther] = useState("");
+  const [showBanner, setShowBanner] = useState(false);
+  const [bannerMessage, setBannerMessage] = useState("");
+  const [bannerType, setBannerType] = useState<"success" | "advice" | "warning">("success");
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [messageQueue, setMessageQueue] = useState<string[]>([]);
 
   const canContinue =
     smoked === false ||
@@ -75,17 +112,14 @@ export default function SmokedTodayScreen() {
 
   const handleContinue = () => {
     if (smoked === false) {
-      // No fumó - incrementar días sin fumar
-      const newDays = currentDays + 1;
-      router.push({
-        pathname: "/home",
-        params: { 
-          daysWithoutSmoking: newDays.toString(),
-          totalCigarettes: currentTotal.toString()
-        }
-      });
+      // No fumó - enviar 10 felicitaciones
+      setMessageQueue(CONGRATULATIONS);
+      setBannerType("success");
+      setBannerIndex(0);
+      setShowBanner(true);
+      setBannerMessage(CONGRATULATIONS[0]);
     } else if (amount) {
-      // Fumó - sumar cantidad de cigarrillos al total
+      // Fumó - determinar cantidad
       let cigCount = 0;
       if (amount === "otro") {
         cigCount = parseInt(other) || 0;
@@ -93,15 +127,57 @@ export default function SmokedTodayScreen() {
         const ranges: Record<string, number> = { "1-5": 3, "6-10": 8, "11-15": 13, "16-20": 18, "20+": 25 };
         cigCount = ranges[amount] || 0;
       }
-      const newTotal = currentTotal + cigCount;
-      router.push({
-        pathname: "/home",
-        params: { 
-          cigarettes: cigCount.toString(),
-          totalCigarettes: newTotal.toString(),
-          daysWithoutSmoking: currentDays.toString()
+      
+      // Si fuma poco (10 o menos): consejos
+      // Si fuma mucho (11 o más): advertencias serias
+      if (cigCount <= 10) {
+        setMessageQueue(LOW_SMOKE_ADVICE);
+        setBannerType("advice");
+      } else {
+        setMessageQueue(HIGH_SMOKE_WARNING);
+        setBannerType("warning");
+      }
+      setBannerIndex(0);
+      setShowBanner(true);
+      setBannerMessage(messageQueue[0]);
+    }
+  };
+
+  const handleNextBanner = () => {
+    if (bannerIndex < messageQueue.length - 1) {
+      const nextIndex = bannerIndex + 1;
+      setBannerIndex(nextIndex);
+      setBannerMessage(messageQueue[nextIndex]);
+    } else {
+      // Terminó la secuencia de notificaciones
+      setShowBanner(false);
+      if (smoked === false) {
+        const newDays = currentDays + 1;
+        router.push({
+          pathname: "/home",
+          params: { 
+            daysWithoutSmoking: newDays.toString(),
+            totalCigarettes: currentTotal.toString()
+          }
+        });
+      } else {
+        let cigCount = 0;
+        if (amount === "otro") {
+          cigCount = parseInt(other) || 0;
+        } else {
+          const ranges: Record<string, number> = { "1-5": 3, "6-10": 8, "11-15": 13, "16-20": 18, "20+": 25 };
+          cigCount = ranges[amount] || 0;
         }
-      });
+        const newTotal = currentTotal + cigCount;
+        router.push({
+          pathname: "/home",
+          params: { 
+            cigarettes: cigCount.toString(),
+            totalCigarettes: newTotal.toString(),
+            daysWithoutSmoking: currentDays.toString()
+          }
+        });
+      }
     }
   };
 
@@ -116,6 +192,27 @@ export default function SmokedTodayScreen() {
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
+          {/* Banner de notificaciones */}
+          {showBanner && (
+            <View style={[styles.notificationBanner, 
+              bannerType === "success" && styles.bannerSuccess,
+              bannerType === "advice" && styles.bannerAdvice,
+              bannerType === "warning" && styles.bannerWarning
+            ]}>
+              <View style={styles.bannerContent}>
+                <Text style={styles.bannerTitle}>
+                  {bannerType === "success" ? "¡Felicitaciones!" : 
+                   bannerType === "advice" ? "Consejo" : "Advertencia"}
+                </Text>
+                <Text style={styles.bannerMessage}>{bannerMessage}</Text>
+                <Text style={styles.bannerProgress}>{bannerIndex + 1} de {messageQueue.length}</Text>
+              </View>
+              <TouchableOpacity style={styles.bannerButton} onPress={handleNextBanner}>
+                <Text style={styles.bannerButtonText}>Siguiente</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           <ScrollView
             contentContainerStyle={styles.scroll}
             keyboardShouldPersistTaps="handled"
@@ -409,4 +506,64 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   nextText: { color: C.white, fontSize: 18, fontWeight: "700" },
+
+  /* Banner de notificaciones */
+  notificationBanner: {
+    position: "absolute",
+    top: 50,
+    left: 16,
+    right: 16,
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+    zIndex: 100,
+  },
+  bannerSuccess: {
+    borderWidth: 2,
+    borderColor: C.green,
+  },
+  bannerAdvice: {
+    borderWidth: 2,
+    borderColor: "#3498DB",
+  },
+  bannerWarning: {
+    borderWidth: 2,
+    borderColor: "#E74C3C",
+  },
+  bannerContent: {
+    marginBottom: 12,
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: C.dark,
+    marginBottom: 4,
+  },
+  bannerMessage: {
+    fontSize: 15,
+    color: C.muted,
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  bannerProgress: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "600",
+  },
+  bannerButton: {
+    backgroundColor: C.green,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  bannerButtonText: {
+    color: C.white,
+    fontSize: 16,
+    fontWeight: "700",
+  },
 });
